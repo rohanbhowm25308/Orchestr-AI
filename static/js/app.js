@@ -46,6 +46,79 @@
     });
   });
 
+  // --------------------------------------------------------- voice input
+
+  const voiceBtn = document.getElementById("voice-btn");
+  const voiceStatus = document.getElementById("voice-status");
+  const voiceLabel = voiceBtn ? voiceBtn.querySelector(".voice-label") : null;
+  let recognition = null;
+  let listening = false;
+
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (voiceBtn) {
+    if (!SpeechRecognitionAPI) {
+      voiceBtn.disabled = true;
+      voiceBtn.title = "Voice input isn't supported in this browser — try Chrome or Edge.";
+      voiceStatus.textContent = "Voice input isn't supported in this browser — try Chrome or Edge.";
+    } else {
+      recognition = new SpeechRecognitionAPI();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        listening = true;
+        voiceBtn.classList.add("listening");
+        if (voiceLabel) voiceLabel.textContent = "Listening…";
+        voiceStatus.textContent = "Listening — speak your request now.";
+        voiceStatus.style.color = "var(--critical)";
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        textEl.value = transcript;
+      };
+
+      recognition.onerror = (event) => {
+        voiceStatus.textContent =
+          event.error === "not-allowed"
+            ? "Microphone access was blocked — allow it in your browser's site settings and try again."
+            : `Voice input error: ${event.error}`;
+        voiceStatus.style.color = "var(--critical)";
+      };
+
+      recognition.onend = () => {
+        listening = false;
+        voiceBtn.classList.remove("listening");
+        if (voiceLabel) voiceLabel.textContent = "Speak";
+        if (textEl.value.trim()) {
+          voiceStatus.textContent = "Got it — edit the text above if needed, then run the request.";
+          voiceStatus.style.color = "var(--safe)";
+        } else {
+          voiceStatus.textContent = "";
+        }
+      };
+
+      voiceBtn.addEventListener("click", () => {
+        if (listening) {
+          recognition.stop();
+          return;
+        }
+        textEl.value = "";
+        voiceStatus.style.color = "var(--critical)";
+        try {
+          recognition.start();
+        } catch (err) {
+          voiceStatus.textContent = "Couldn't start voice input — try clicking again.";
+        }
+      });
+    }
+  }
+
   // ------------------------------------------------------- pipeline strip
 
   function resetPipeline() {

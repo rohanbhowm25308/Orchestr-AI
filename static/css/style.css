@@ -304,6 +304,23 @@ textarea:focus{ border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(5
 }
 .demo-status{ margin-top: 12px; font-size: 0.85rem; color: var(--cyan); min-height: 1.2em; font-family: var(--font-mono); }
 
+.btn-voice{ display: inline-flex; align-items: center; gap: 6px; }
+.btn-voice .voice-icon{ font-size: 1rem; line-height: 1; }
+.btn-voice.listening{
+  color: var(--critical);
+  border-color: rgba(244,87,79,0.45);
+  background: rgba(244,87,79,0.1);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.btn-voice:disabled{ opacity: 0.4; cursor: not-allowed; }
+.voice-status{
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--critical);
+  min-height: 1.2em;
+  font-family: var(--font-mono);
+}
+
 .scheduler-row{
   margin-top: 18px;
   padding-top: 16px;
@@ -616,3 +633,6 @@ textarea:focus{ border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(5
 }
 .footer-brand{ font-family: var(--font-display); font-size: 0.88rem; color: var(--text-muted); }
 .footer-stack{ display: flex; gap: 18px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-faint); flex-wrap: wrap; }
+
+/* Pin the voice button next to Run request instead of centered by space-between */
+.btn-voice{ margin-left: auto; }

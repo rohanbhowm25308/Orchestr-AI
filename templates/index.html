@@ -40,7 +40,7 @@
   <!-- ================= HERO ================= -->
   <section class="hero">
     <div class="hero-inner">
-      <p class="eyebrow">Notion Track</p>
+      <p class="eyebrow">Notion Track · Microsoft AI Hackathon</p>
       <h1 class="hero-title">AI handles the work.<br>Humans stay in control.</h1>
       <p class="hero-sub">
         OrchestrAI reads a messy request the moment it arrives, decides what should happen,
@@ -83,8 +83,12 @@
               <option value="form">Inbound form</option>
             </select>
           </label>
+          <button id="voice-btn" type="button" class="btn btn-ghost btn-small btn-voice" title="Speak your request">
+            <span class="voice-icon">🎤</span><span class="voice-label">Speak</span>
+          </button>
           <button id="run-btn" class="btn btn-primary">Run request →</button>
         </div>
+        <p id="voice-status" class="voice-status"></p>
         <p id="demo-status" class="demo-status"></p>
 
         <div class="scheduler-row">
