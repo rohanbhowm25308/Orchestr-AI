@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrchestrAI — AI handles the work. Humans stay in control.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="4" r="2.4" fill="currentColor"/><circle cx="4" cy="18" r="2.4" fill="currentColor"/><circle cx="20" cy="18" r="2.4" fill="currentColor"/><path d="M12 6.4L5.2 16M12 6.4L18.8 16M6.4 18h11.2" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></span>
+      <span class="brand-name">OrchestrAI</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#demo">Run a request</a>
+      <a href="#agents">Agents</a>
+      <a href="#runlog">Run log</a>
+      <a href="#dashboard">Dashboard</a>
+    </nav>
+    <label class="role-select">
+      <span>Acting as</span>
+      <select id="role-picker">
+        <option value="operator">Operator</option>
+        <option value="manager">Manager</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+  </div>
+  <div class="integration-strip" id="integration-strip"></div>
+</header>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Notion Track</p>
+      <h1 class="hero-title">AI handles the work.<br>Humans stay in control.</h1>
+      <p class="hero-sub">
+        OrchestrAI reads a messy request the moment it arrives, decides what should happen,
+        scores the risk of doing it, and only stops to ask a person when the action is genuinely
+        risky. Everything it does is real — a ticket filed, an incident opened, a refund issued —
+        and every decision is auditable, role-gated, and recoverable when something downstream fails.
+      </p>
+      <div class="hero-cta">
+        <a href="#demo" class="btn btn-primary">Run a request</a>
+        <a href="#agents" class="btn btn-ghost">See the agents</a>
+      </div>
+      <p class="hero-flow">Trigger&nbsp;→&nbsp;Intake&nbsp;→&nbsp;Decision&nbsp;→&nbsp;Risk&nbsp;→&nbsp;Human&nbsp;(when needed)&nbsp;→&nbsp;Action&nbsp;→&nbsp;Log</p>
+    </div>
+  </section>
+
+  <!-- ================= DEMO / SUBMIT ================= -->
+  <section class="section" id="demo">
+    <div class="section-inner">
+      <p class="section-eyebrow">01 — Trigger</p>
+      <h2 class="section-title">Send OrchestrAI something messy</h2>
+      <p class="section-sub">Paste a real request the way a person would actually type it. Pick how it arrives — manual, an authenticated webhook, or a scheduled cron job that runs even with this tab closed.</p>
+
+      <div class="glass demo-panel">
+        <div class="demo-examples">
+          <span class="demo-examples-label">Try one:</span>
+          <button class="example-chip" data-example="The customer says their order arrived damaged and wants a refund of ₹8500. She's pretty angry about it.">Damaged order refund</button>
+          <button class="example-chip" data-example="The website payment system has been failing since afternoon. Several customers have complained and this needs immediate attention.">Payment outage</button>
+          <button class="example-chip" data-example="Priya from the design team wants to apply for 3 days of leave starting Monday, whenever it's convenient to approve.">Routine leave request</button>
+          <button class="example-chip" data-example="Customer is asking for a refund of ₹45000 for a cancelled enterprise order, says it's urgent and he's furious.">Large urgent refund</button>
+        </div>
+
+        <textarea id="request-text" rows="4" placeholder="e.g. The customer says their payment went through but the order is still showing pending and he is getting angry..."></textarea>
+
+        <div class="demo-controls">
+          <label class="trigger-select">
+            <span>Trigger source</span>
+            <select id="trigger-source">
+              <option value="manual" selected>Manual</option>
+              <option value="webhook">Webhook (authenticated)</option>
+              <option value="form">Inbound form</option>
+            </select>
+          </label>
+          <button id="run-btn" class="btn btn-primary">Run request →</button>
+        </div>
+        <p id="demo-status" class="demo-status"></p>
+
+        <div class="scheduler-row">
+          <span class="scheduler-label">⏱ Or schedule it as a real cron trigger:</span>
+          <input type="number" id="schedule-delay" value="15" min="3" max="120">
+          <span class="scheduler-suffix">seconds from now</span>
+          <button id="schedule-btn" class="btn btn-ghost btn-small">Schedule</button>
+        </div>
+        <div id="schedule-queue-list" class="schedule-queue-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WORKFLOW DNA / PIPELINE ================= -->
+  <section class="section" id="pipeline">
+    <div class="section-inner">
+      <p class="section-eyebrow">02 — Workflow DNA</p>
+      <h2 class="section-title">Every request runs the same fixed sequence</h2>
+      <p class="section-sub">This is the actual execution order, not decoration — each node lights up as your request reaches it.</p>
+
+      <div class="glass pipeline-strip" id="pipeline-strip">
+        <div class="pnode" data-node="trigger"><div class="pdot"></div><span>Trigger</span></div>
+        <div class="pline" data-line="0"></div>
+        <div class="pnode" data-node="intake"><div class="pdot"></div><span>Intake</span></div>
+        <div class="pline" data-line="1"></div>
+        <div class="pnode" data-node="decision"><div class="pdot"></div><span>Decision</span></div>
+        <div class="pline" data-line="2"></div>
+        <div class="pnode" data-node="risk"><div class="pdot"></div><span>Risk</span></div>
+        <div class="pline" data-line="3"></div>
+        <div class="pnode" data-node="human"><div class="pdot"></div><span>Human</span></div>
+        <div class="pline" data-line="4"></div>
+        <div class="pnode" data-node="action"><div class="pdot"></div><span>Action</span></div>
+        <div class="pline" data-line="5"></div>
+        <div class="pnode" data-node="log"><div class="pdot"></div><span>Log</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIVE AGENT MONITOR + COLLABORATION GRAPH ================= -->
+  <section class="section" id="agents">
+    <div class="section-inner">
+      <p class="section-eyebrow">03 — Agent visibility</p>
+      <h2 class="section-title">Who's doing what, right now</h2>
+      <p class="section-sub">Six agents, each with one job — watch them light up as a request moves through the pipeline.</p>
+
+      <div class="agents-grid">
+        <div class="glass agent-monitor" id="agent-monitor">
+          <h3 class="card-title">Live agent activity</h3>
+          <div class="agent-row" data-agent="intake"><span class="agent-dot"></span><span class="agent-name">Intake Agent</span><span class="agent-status">Idle</span></div>
+          <div class="agent-row" data-agent="decision"><span class="agent-dot"></span><span class="agent-name">Decision Agent</span><span class="agent-status">Idle</span></div>
+          <div class="agent-row" data-agent="risk"><span class="agent-dot"></span><span class="agent-name">Risk Agent</span><span class="agent-status">Idle</span></div>
+          <div class="agent-row" data-agent="human"><span class="agent-dot"></span><span class="agent-name">Approval Agent</span><span class="agent-status">Idle</span></div>
+          <div class="agent-row" data-agent="action"><span class="agent-dot"></span><span class="agent-name">Action Agent</span><span class="agent-status">Idle</span></div>
+          <div class="agent-row" data-agent="recovery"><span class="agent-dot"></span><span class="agent-name">Recovery Agent</span><span class="agent-status">Idle</span></div>
+        </div>
+
+        <div class="glass graph-wrap">
+          <h3 class="card-title">Agent collaboration graph</h3>
+          <svg viewBox="0 0 360 300" id="collab-graph">
+            <line x1="60" y1="30" x2="60" y2="90" class="gedge" data-edge="intake-decision"/>
+            <line x1="60" y1="90" x2="60" y2="150" class="gedge" data-edge="decision-risk"/>
+            <line x1="60" y1="150" x2="60" y2="210" class="gedge" data-edge="risk-human"/>
+            <line x1="60" y1="210" x2="60" y2="270" class="gedge" data-edge="human-action"/>
+            <line x1="60" y1="270" x2="150" y2="270" class="gedge" data-edge="action-recovery"/>
+
+            <g class="gnode" data-gnode="intake" transform="translate(60,30)">
+              <circle r="22"/><text y="5" text-anchor="middle">Intake</text>
+            </g>
+            <g class="gnode" data-gnode="decision" transform="translate(60,90)">
+              <circle r="22"/><text y="5" text-anchor="middle">Decision</text>
+            </g>
+            <g class="gnode" data-gnode="risk" transform="translate(60,150)">
+              <circle r="22"/><text y="5" text-anchor="middle">Risk</text>
+            </g>
+            <g class="gnode" data-gnode="human" transform="translate(60,210)">
+              <circle r="22"/><text y="5" text-anchor="middle">Human</text>
+            </g>
+            <g class="gnode" data-gnode="action" transform="translate(60,270)">
+              <circle r="22"/><text y="5" text-anchor="middle">Action</text>
+            </g>
+            <g class="gnode gnode-side" data-gnode="recovery" transform="translate(150,270)">
+              <circle r="20"/><text y="5" text-anchor="middle">Recovery</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="glass card" id="understanding-card">
+          <h3 class="card-title">AI understanding</h3>
+          <div class="kv"><span>Intent</span><b id="u-intent">—</b></div>
+          <div class="kv"><span>Category</span><b id="u-category">—</b></div>
+          <div class="kv"><span>Department</span><b id="u-department">—</b></div>
+          <div class="kv"><span>Priority</span><b id="u-priority">—</b></div>
+          <p class="why-text" id="u-why">Run a request to see the AI's reasoning here.</p>
+        </div>
+
+        <div class="glass card" id="risk-card">
+          <h3 class="card-title">Risk engine</h3>
+          <div class="risk-gauge">
+            <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-fill"></div></div>
+            <div class="risk-score-label"><span id="risk-score">0</span><small>/100</small></div>
+          </div>
+          <div class="kv"><span>Band</span><b id="risk-band">—</b></div>
+          <div class="kv"><span>Autonomy mode</span><b id="risk-mode">—</b></div>
+          <p class="why-text" id="risk-why">Risk explanation appears here after a run.</p>
+        </div>
+      </div>
+
+      <!-- Approval panel -->
+      <div class="glass approval-panel" id="approval-panel" hidden>
+        <div class="approval-header">
+          <span class="approval-flag">⏸ Approval required</span>
+          <p id="approval-summary">—</p>
+        </div>
+        <div class="whatif-row">
+          <button class="btn btn-ghost btn-small" id="whatif-approve">What if I approve?</button>
+          <button class="btn btn-ghost btn-small" id="whatif-reject">What if I reject?</button>
+        </div>
+        <div id="whatif-output" class="whatif-output" hidden></div>
+        <div class="approval-body">
+          <label class="modify-row" id="modify-row" hidden>
+            <span>Modified value</span>
+            <input type="number" id="modify-value">
+          </label>
+          <div class="approval-actions">
+            <button class="btn btn-approve" data-decision="approve">✓ Approve</button>
+            <button class="btn btn-modify" data-decision="modify">✏ Modify</button>
+            <button class="btn btn-reject" data-decision="reject">✕ Reject</button>
+          </div>
+        </div>
+        <p id="permission-error" class="permission-error" hidden></p>
+      </div>
+
+      <!-- Manual-execution confirmation panel -->
+      <div class="glass manual-panel" id="manual-panel" hidden>
+        <span class="approval-flag manual-flag">🖐 Manual execution required</span>
+        <p id="manual-summary">The AI will not call any external system for this MANUAL-risk action — a human carries it out.</p>
+        <button class="btn btn-approve" id="complete-manual-btn">Mark as completed manually</button>
+      </div>
+
+      <div class="glass result-banner" id="result-banner" hidden>
+        <span class="result-icon">✓</span>
+        <p id="result-text">—</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RUN LOG ================= -->
+  <section class="section" id="runlog">
+    <div class="section-inner">
+      <p class="section-eyebrow">04 — Audit trail</p>
+      <h2 class="section-title">Run log</h2>
+      <p class="section-sub">Every state change, timestamped, written by the code itself — the kind of log a stranger could read and know exactly what happened.</p>
+      <div class="glass log-panel">
+        <table class="log-table">
+          <thead><tr><th>Time</th><th>Request</th><th>Event</th></tr></thead>
+          <tbody id="log-body">
+            <tr class="log-empty"><td colspan="3">No events yet. Run a request above.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="section" id="dashboard">
+    <div class="section-inner">
+      <p class="section-eyebrow">05 — Visibility</p>
+      <h2 class="section-title">Operations dashboard</h2>
+      <p class="section-sub">Visibility into what the system has decided — not the engine itself. The engine is above; this is just the window into it.</p>
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="glass metric-card"><span class="metric-value" id="m-total">0</span><span class="metric-label">Total requests</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-auto">0</span><span class="metric-label">Auto-executed</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-pending">0</span><span class="metric-label">Pending approval</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-awaiting-manual">0</span><span class="metric-label">Awaiting manual execution</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-approved">0</span><span class="metric-label">Human approved</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-modified">0</span><span class="metric-label">Human modified</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-rejected">0</span><span class="metric-label">Human rejected</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-approval-rate">0%</span><span class="metric-label">Approval rate</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-override-rate">0%</span><span class="metric-label">Override rate</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-avg-risk">0</span><span class="metric-label">Avg. risk score</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-avg-decision">0s</span><span class="metric-label">Avg. decision time</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-duplicates">0</span><span class="metric-label">Duplicates prevented</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-recovered">0</span><span class="metric-label">Actions recovered</span></div>
+        <div class="glass metric-card"><span class="metric-value" id="m-escalated">0</span><span class="metric-label">Escalated after failure</span></div>
+      </div>
+
+      <div class="glass admin-panel" id="admin-panel">
+        <h3 class="card-title">Autonomy policy <span class="admin-only-tag">Admin only</span></h3>
+        <p class="section-sub" style="margin-top:0">Change the risk thresholds that decide AUTO / SUPERVISED / MANUAL for every request from now on.</p>
+        <div class="admin-controls">
+          <label>AUTO up to <input type="number" id="threshold-auto" value="30"></label>
+          <label>SUPERVISED up to <input type="number" id="threshold-supervised" value="75"></label>
+          <button class="btn btn-primary btn-small" id="save-thresholds-btn">Save policy</button>
+        </div>
+        <p id="admin-status" class="demo-status"></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">OrchestrAI — Autonomous AI Operations &amp; Human-Control System</div>
+    <div class="footer-stack">
+      <span>Python · Flask</span><span>HTML · CSS · JS</span><span>Groq API (optional)</span>
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
