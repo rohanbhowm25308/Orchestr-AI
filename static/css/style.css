@@ -34,12 +34,7 @@
 html{ scroll-behavior: smooth; }
 
 body{
-  background-image: url('../img/bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-color: var(--bg-void);
+  background: var(--bg-void);
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -49,6 +44,21 @@ body{
 }
 
 a{ color: inherit; text-decoration: none; }
+
+/* ==========================================================================
+   Particle background canvas
+   ========================================================================== */
+#particle-field{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 25% 0%, rgba(59,123,255,0.16), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 20%, rgba(79,224,255,0.10), transparent 60%),
+    var(--bg-void);
+}
 
 /* ==========================================================================
    Glass panel utility
@@ -75,15 +85,16 @@ a{ color: inherit; text-decoration: none; }
   max-width: var(--max-w);
   margin: 0 auto;
   padding: 16px 24px;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
 }
-.brand{ display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.brand{ display: flex; align-items: center; gap: 8px; }
 .brand-mark{ color: var(--cyan); display: flex; }
-.brand-name{ font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.01em; }
+.brand-name{ font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; letter-spacing: 0.01em; }
 
-.nav-links{ display: flex; gap: 26px; font-size: 0.88rem; color: var(--text-muted); }
+.nav-links{ display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; color: var(--text-muted); }
 .nav-links a:hover{ color: var(--text-primary); }
 
 .autonomy-legend{ display: flex; gap: 8px; }
@@ -100,7 +111,7 @@ a{ color: inherit; text-decoration: none; }
 .chip-supervised{ color: var(--moderate); border-color: rgba(251,191,36,0.35); }
 .chip-manual{ color: var(--critical); border-color: rgba(244,87,79,0.35); }
 
-.role-select{ display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); }
+.role-select{ display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); justify-self: end; }
 .role-select select{
   background: rgba(4,7,16,0.6);
   border: 1px solid var(--border-soft);
@@ -304,7 +315,7 @@ textarea:focus{ border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(5
 }
 .demo-status{ margin-top: 12px; font-size: 0.85rem; color: var(--cyan); min-height: 1.2em; font-family: var(--font-mono); }
 
-.btn-voice{ display: inline-flex; align-items: center; gap: 6px; }
+.btn-voice{ display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
 .btn-voice .voice-icon{ font-size: 1rem; line-height: 1; }
 .btn-voice.listening{
   color: var(--critical);
@@ -634,5 +645,27 @@ textarea:focus{ border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(5
 .footer-brand{ font-family: var(--font-display); font-size: 0.88rem; color: var(--text-muted); }
 .footer-stack{ display: flex; gap: 18px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-faint); flex-wrap: wrap; }
 
-/* Pin the voice button next to Run request instead of centered by space-between */
-.btn-voice{ margin-left: auto; }
+.footer-credits{
+  max-width: var(--max-w);
+  margin: 18px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.footer-devs{ font-size: 0.82rem; color: var(--text-muted); }
+.footer-devs span{ color: var(--text-primary); font-weight: 500; }
+.footer-socials{ display: flex; gap: 18px; }
+.footer-socials a{
+  color: var(--text-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.footer-socials a:hover{ color: var(--cyan); transform: translateY(-2px); }
